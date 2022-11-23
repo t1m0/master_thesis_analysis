@@ -2,9 +2,11 @@ import os
 import rsa
 from base64 import b64decode
 
-from src.file_handling import ensure_subfolder_exists, extract_simple_file_name
+from src.file_handling import delete,ensure_subfolder_exists, extract_simple_file_name
 
 def decrypt_files(src_folder, target_folder):
+    delete(target_folder)
+    os.makedirs(target_folder, exist_ok=True)
     for file in os.listdir(src_folder):
         file_path = os.path.join(src_folder, file)
         if os.path.isdir(file_path):
