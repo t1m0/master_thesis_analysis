@@ -22,12 +22,14 @@ def process_calibration_file(file_name):
         x=acceleration['xAxis']
         y=acceleration['yAxis']
         z=acceleration['zAxis']
+        time_stamp=acceleration['timeStamp']
         mag=calc_magnitude(x,y,z)
         pandas_row = {
             'subject': subject,
             'file': simple_file_name,
             'hand': hand,
             'device': device,
+            'time_stamp':time_stamp,
             'x':x,
             'y':y,
             'z':z,
