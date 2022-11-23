@@ -9,6 +9,8 @@ account_url = "https://t1m0storageaccount.blob.core.windows.net"
 container_name = "master-thesis-data"
 
 def download(traget_folder, cloud="azure"):
+    delete(traget_folder)
+    os.makedirs(traget_folder, exist_ok=True)
     try:
         if cloud == "azure":
             _download_azure(traget_folder)
@@ -23,9 +25,6 @@ def download(traget_folder, cloud="azure"):
         print(ex)
 
 def _download_azure(traget_folder):
-    delete(traget_folder)
-    os.makedirs(traget_folder, exist_ok=True)
-    
     connect_str = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
     blob_service_client = BlobServiceClient.from_connection_string(connect_str)
     
@@ -41,8 +40,6 @@ def _download_azure(traget_folder):
                 download_file.write(container_client.download_blob(blob.name).readall())
 
 def _download_aws(traget_folder):
-    delete(traget_folder)
-    os.makedirs(traget_folder, exist_ok=True)
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(bucket_name)
     for file in bucket.objects.filter():
