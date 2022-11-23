@@ -2,7 +2,7 @@ import os
 import rsa
 from base64 import b64decode
 
-from src.file_handling import ensure_subfolder_exists
+from src.file_handling import ensure_subfolder_exists, extract_simple_file_name
 
 def decrypt_files(src_folder, target_folder):
     for file in os.listdir(src_folder):
@@ -15,7 +15,7 @@ def decrypt_files(src_folder, target_folder):
 def _decrypt_file(file_path,target_folder):
     file = open(file_path)
     lines = file.readlines()
-    file_name = os.path.split(file_path)[1]
+    file_name = extract_simple_file_name(file_path)
     targer_file_name = target_folder+'/'+file_name
     ensure_subfolder_exists(targer_file_name)
     with open(targer_file_name, 'a') as the_file:
