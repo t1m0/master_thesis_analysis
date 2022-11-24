@@ -2,6 +2,15 @@ import json
 from src.file_handling import extract_subject, extract_simple_file_name
 from src.accelerometer import calc_magnitude
 
+def _find_click_number(clicks_time_stamps, current_time_stamp):
+    click_number = 0
+    for i in range(len(clicks_time_stamps)):
+        if clicks_time_stamps[i] > current_time_stamp:
+            break
+        else:
+            click_number = i
+    return click_number
+
 def process_stroop_file(file_path):
     file = open(file_path)
     json_data = json.load(file)
@@ -24,21 +33,15 @@ def process_stroop_file(file_path):
     clicks_time_stamps = []
     for click in clicks:
         clicks_time_stamps.append(click['timeStamp'])
-    
+
     for acceleration in accelerations:
-        click_number = 0
         time_stamp = acceleration['timeStamp']
-        for i in range(len(clicks_time_stamps)):
-            if clicks_time_stamps[i] > time_stamp:
-                click_number = i
-            else:
-                break
+        click_number = _find_click_number(clicks_time_stamps, time_stamp)
         duration = time_stamp - start_time
         x=acceleration['xAxis']
         y=acceleration['yAxis']
         z=acceleration['zAxis']
         mag=calc_magnitude(x,y,z)
-        time_stamp=acceleration['timeStamp']
         pandas_row = {
             'subject': subject,
             'file': simple_file_name,
