@@ -18,6 +18,7 @@ def process_spiral_file(file_name):
     hand = json_data['hand']
     device = json_data['device']
     uuid = json_data['drawing']['uuid']
+    start_time = json_data['drawing']['startTime']
     first_order_smoothness =json_data['result']["firstOrderSmoothness"]
     second_order_smoothness = json_data['result']["secondOrderSmoothness"]
     thightness = json_data['result']["thightness"]
@@ -29,6 +30,7 @@ def process_spiral_file(file_name):
         z=acceleration['zAxis']
         time_stamp=acceleration['timeStamp']
         mag=calc_magnitude(x,y,z)
+        duration = time_stamp - start_time
         pandas_row = {
             'subject': subject,
             'file': simple_file_name,
@@ -40,6 +42,7 @@ def process_spiral_file(file_name):
             'thightness':thightness,
             'zero_crossing_rate':zero_crossing_rate,
             'time_stamp':time_stamp,
+            'duration':duration,
             'x':x,
             'y':y,
             'z':z,

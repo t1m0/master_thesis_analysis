@@ -3,7 +3,7 @@ from src.file_handling import extract_subject, extract_simple_file_name
 from src.accelerometer import calc_magnitude
 
 
-def _process_accelerations(base_record, accelerations):
+def _process_accelerations(base_record, start_time, accelerations):
     data = []
     for acceleration in accelerations:
         record = base_record.copy()
@@ -11,8 +11,10 @@ def _process_accelerations(base_record, accelerations):
         y = acceleration['yAxis']
         z = acceleration['zAxis']
         time_stamp = acceleration['timeStamp']
+        duration = time_stamp - start_time
         mag = calc_magnitude(x, y, z)
         record['time_stamp'] = time_stamp
+        record['duration'] = duration
         record['x'] = x
         record['y'] = y
         record['z'] = z
@@ -35,6 +37,7 @@ def process_drift_file(file_name):
     subject = extract_subject(file_name)
     simple_file_name = extract_simple_file_name(file_name)
     uuid = json_data['uuid']
+    start_time = json_data['startTime']
     dominant_hand_device = json_data['dominantDevice']
     non_dominant_hand_device = json_data['nonDominantDevice']
 
@@ -53,5 +56,5 @@ def process_drift_file(file_name):
         hand_accelerations = accelerations[hand]
         if len(hand_accelerations) <= 0:
             return None
-        data = data + _process_accelerations(base_record,hand_accelerations)
+        data = data + _process_accelerations(base_record,start_time, hand_accelerations)
     return data
