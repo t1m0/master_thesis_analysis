@@ -47,14 +47,14 @@ def process_accelerations(accelerations, start_time):
         'magnitude_raw':magnitude
     }
 
-def _fourier_transformation(result):
-    values = list(result['magnitude'].values())
+def _fourier_transformation(acceleration_df):
+    values = acceleration_df['mag'].tolist()
 
     X = np.fft.fft(values)
     N = len(X)
     n = np.arange(N)
 
-    duration = result['magnitude'][list(result['magnitude'].keys())[-1]]
+    duration = acceleration_df['duration'].max()
     sample_rate = (N / duration ) * 1000
 
     sr = 1 / sample_rate
@@ -71,22 +71,12 @@ def _fourier_transformation(result):
     spectrum.pop(0)
     return f_oneside, spectrum
 
-def plot_fourier_transformation(result):
-    x,y = _fourier_transformation(result)
+def plot_fourier_transformation(acceleration_df, title=""):
+    x,y = _fourier_transformation(acceleration_df)
     plt.figure(figsize = (12, 6))
     plt.plot(x, y, 'b')
     plt.xlabel('Freq (Hz)')
     plt.ylabel('FFT Amplitude')
+    plt.title('FFT '+title)
     plt.show()
 
-def plot_acceleration(result, title,dividers = []):
-    plt.plot(result['x'].keys(), result['x'].values(), label = f"x", linestyle='solid')
-    plt.plot(result['y'].keys(), result['y'].values(), label = f"y", linestyle='dashed')
-    plt.plot(result['z'].keys(), result['z'].values(), label = f"z", linestyle='dotted')
-    plt.plot(result['magnitude'].keys(), result['magnitude'].values(), label = f"magnitude", linestyle='dashdot')
-    for divider in dividers:
-        plt.axvline(x = divider, color = 'b')
-    plt.legend()
-    plt.title(title)
-    plt.ylim([-4000, 4000])
-    plt.show()
