@@ -16,6 +16,7 @@ def process_calibration_file(file_name):
     subject = extract_subject(file_name)
     simple_file_name = extract_simple_file_name(file_name)
     hand = json_data['hand']
+    uuid = json_data['uuid']
     device = json_data['device']
     start_time = json_data['startTime']
 
@@ -28,6 +29,7 @@ def process_calibration_file(file_name):
         mag=calc_magnitude(x,y,z)
         pandas_row = {
             'subject': subject,
+            'uuid': uuid,
             'file': simple_file_name,
             'hand': hand,
             'device': device,
