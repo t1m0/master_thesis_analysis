@@ -80,3 +80,15 @@ def plot_fourier_transformation(acceleration_df, title=""):
     plt.title('FFT '+title)
     plt.show()
 
+def plot_stacceleration(subject_df, title):
+    
+    plt.plot(subject_df['duration'].tolist(), subject_df['x'].tolist(), label = f"x", linestyle='solid')
+    plt.plot(subject_df['duration'].tolist(), subject_df['y'].tolist(), label = f"y", linestyle='dashed')
+    plt.plot(subject_df['duration'].tolist(), subject_df['z'].tolist(), label = f"z", linestyle='dotted')
+    plt.plot(subject_df['duration'].tolist(), subject_df['mag'].tolist(), label = f"magnitude", linestyle='dashdot')
+    
+        
+    plt.legend()
+    plt.title(title)
+#    plt.ylim([-4000, 4000])
+    plt.show()
