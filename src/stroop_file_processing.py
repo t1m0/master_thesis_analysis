@@ -23,6 +23,12 @@ def process_stroop_file(file_path):
     data = []
 
     subject = extract_subject(file_path)
+    if(subject.startswith('30-')):
+        age_group = 30
+    elif(subject.startswith('50-')):
+        age_group = 50
+    else:
+        age_group = 0
     simple_file_name = extract_simple_file_name(file_path)
     hand = json_data['hand']
     device = json_data['device']
@@ -44,6 +50,7 @@ def process_stroop_file(file_path):
         mag=calc_magnitude(x,y,z)
         pandas_row = {
             'subject': subject,
+            'age_group': age_group,
             'file': simple_file_name,
             'uuid':uuid,
             'hand': hand,
