@@ -138,3 +138,24 @@ def plot_acceleration(subject_df, title):
 def plot_acceleration_subplots(df):
     soreted_df = df.sort_index()
     soreted_df[['x','y','z','mag']].plot(figsize=(40,30), grid=True, subplots=True, legend=True, ylim=[-2500,6000])
+
+def plot_feature_columns(df, class_key, field):
+    fig, ax =plt.subplots(1,2)
+    fig.set_size_inches(20, 5)
+    fig.suptitle(field)
+    max_values = [
+        df['x_'+field].max(),
+        df['y_'+field].max(),
+        df['z_'+field].max(),
+        df['mag_'+field].max()
+    ]
+    min_values = [
+        df['x_'+field].min(),
+        df['y_'+field].min(),
+        df['z_'+field].min(),
+        df['mag_'+field].min()
+    ]
+    ax[0].set_ylim(min(min_values), max(max_values))
+    ax[1].set_ylim(min(min_values), max(max_values))
+    df_grouped = df.groupby(class_key)[['x_'+field,'y_'+field,'z_'+field,'mag_'+field]]
+    df_grouped.boxplot(fontsize=20, ax=ax)  
