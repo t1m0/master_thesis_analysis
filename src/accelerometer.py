@@ -134,3 +134,7 @@ def plot_acceleration(subject_df, title):
     plt.title(title)
 #    plt.ylim([-4000, 4000])
     plt.show()
+
+def plot_acceleration_subplots(df):
+    soreted_df = df.sort_index()
+    soreted_df[['x','y','z','mag']].plot(figsize=(40,30), grid=True, subplots=True, legend=True, ylim=[-2500,6000])
