@@ -1,6 +1,7 @@
 import json
 from src.file_handling import extract_subject, extract_simple_file_name
 from src.accelerometer import calc_magnitude
+from src.file_processing import extract_age_group
 
 def process_spiral_file(file_name):
     file = open(file_name)
@@ -14,6 +15,7 @@ def process_spiral_file(file_name):
     data = []
 
     subject = extract_subject(file_name)
+    age_group = extract_age_group(subject)
     simple_file_name = extract_simple_file_name(file_name)
     hand = json_data['hand']
     device = json_data['device']
@@ -33,6 +35,7 @@ def process_spiral_file(file_name):
         duration = time_stamp - start_time
         pandas_row = {
             'subject': subject,
+            'age_group': age_group,
             'file': simple_file_name,
             'uuid':uuid,
             'hand': hand,
