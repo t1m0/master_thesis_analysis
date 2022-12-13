@@ -1,6 +1,7 @@
 import json
 from src.file_handling import extract_subject, extract_simple_file_name
 from src.accelerometer import calc_magnitude
+from src.file_processing import extract_age_group
 
 def _find_click_number(clicks_time_stamps, current_time_stamp):
     click_number = 0
@@ -23,12 +24,7 @@ def process_stroop_file(file_path):
     data = []
 
     subject = extract_subject(file_path)
-    if(subject.startswith('30-')):
-        age_group = 30
-    elif(subject.startswith('50-')):
-        age_group = 50
-    else:
-        age_group = 0
+    age_group = extract_age_group(subject)
     simple_file_name = extract_simple_file_name(file_path)
     hand = json_data['hand']
     device = json_data['device']
