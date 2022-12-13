@@ -17,7 +17,7 @@ def stroop_feature_engineering(df):
     # mean deviation
     stroop_mean_df = df.groupby(group_by_keys)[aggregate_keys].agg('mean')
     stroop_mean_df.rename(columns = {'x':'x_mean', 'y':'y_mean', 'z':'z_mean', 'mag':'mag_mean'}, inplace = True)
-    # mean absolut deviation
+    # standard error to mean
     stroop_sem_df = df.groupby(group_by_keys)[aggregate_keys].agg('sem')
     stroop_sem_df.rename(columns = {'x':'x_sem', 'y':'y_sem', 'z':'z_sem', 'mag':'mag_sem'}, inplace = True)
     # peaks
@@ -26,11 +26,15 @@ def stroop_feature_engineering(df):
     # spectral arc length
     spectral_arc_length_df = df.groupby(group_by_keys)[aggregate_keys].agg(spectral_arc_length)
     spectral_arc_length_df.rename(columns = {'x':'x_sal', 'y':'y_sal', 'z':'z_sal', 'mag':'mag_sal'}, inplace = True)
+
+    # total duration
+    duration_df = df.groupby(group_by_keys)['duration'].agg(max)
     
     merged_df = stroop_std_df.merge(stroop_mean_df, on=group_by_keys)
     merged_df = merged_df.merge(stroop_sem_df, on=group_by_keys)
     merged_df = merged_df.merge(stroop_peak_df, on=group_by_keys)
     merged_df = merged_df.merge(spectral_arc_length_df, on=group_by_keys)
+    merged_df = merged_df.merge(duration_df, on=group_by_keys)
     # snr
     for k in aggregate_keys:
         merged_df = _calc_snr(merged_df, k)
