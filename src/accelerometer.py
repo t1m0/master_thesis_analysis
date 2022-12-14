@@ -114,7 +114,7 @@ def accelerometer_feature_engineering(df):
         merged_df = _calc_snr(merged_df, k)
     return merged_df
 
-def plot_fourier_transformation(acceleration_df, title=""):
+def _plot_fourier_transformation_single(acceleration_df, title=""):
     x,y = _fourier_transformation(acceleration_df)
     plt.figure(figsize = (12, 6))
     plt.plot(x, y, 'b')
@@ -122,6 +122,13 @@ def plot_fourier_transformation(acceleration_df, title=""):
     plt.ylabel('FFT Amplitude')
     plt.title('FFT '+title)
     plt.show()
+
+def plot_fourier_transformation(df, title=""):
+    if type(df) is list or type(df) is set:
+        for single_df in df:
+            _plot_fourier_transformation_single(single_df, title)
+    else:
+        _plot_fourier_transformation_single(df, title)
 
 def _get_min_value(df, field=None):
     if type(df) == pd.core.groupby.generic.DataFrameGroupBy:
@@ -158,7 +165,7 @@ def _get_max_value(df, field=None):
     ]
     return max(min_values)
 
-def plot_acceleration(df, subplots=True):
+def _plot_acceleration_single(df, subplots=True):
 #    soreted_df = df.sort_index() . ---- 'DataFrameGroupBy' object has no attribute 'sort_index'
     if subplots:
         figsize=(40,30)
@@ -169,6 +176,13 @@ def plot_acceleration(df, subplots=True):
     max_value = _get_max_value(df)
 
     df[['x','y','z','mag','duration']].plot(x='duration', figsize=figsize, grid=True, subplots=subplots, legend=True, ylim=[min_value,max_value])
+
+def plot_acceleration(df, subplots=True):
+    if type(df) is list or type(df) is set:
+        for single_df in df:
+            _plot_acceleration_single(single_df, subplots)
+    else:
+        _plot_acceleration_single(df, subplots)
 
 def plot_feature_columns(df, class_key, field):
     fig, ax =plt.subplots(1,2)
