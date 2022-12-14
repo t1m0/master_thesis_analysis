@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from src.velocity_peaks import velocity_peaks
@@ -122,40 +123,62 @@ def plot_fourier_transformation(acceleration_df, title=""):
     plt.title('FFT '+title)
     plt.show()
 
-def plot_acceleration(subject_df, title):
-    
-    plt.plot(subject_df['duration'].tolist(), subject_df['x'].tolist(), label = f"x", linestyle='solid')
-    plt.plot(subject_df['duration'].tolist(), subject_df['y'].tolist(), label = f"y", linestyle='dashed')
-    plt.plot(subject_df['duration'].tolist(), subject_df['z'].tolist(), label = f"z", linestyle='dotted')
-    plt.plot(subject_df['duration'].tolist(), subject_df['mag'].tolist(), label = f"magnitude", linestyle='dashdot')
-    
-        
-    plt.legend()
-    plt.title(title)
-#    plt.ylim([-4000, 4000])
-    plt.show()
+def _get_min_value(df, field=None):
+    if type(df) == pd.core.groupby.generic.DataFrameGroupBy:
+        final_df = df.apply(lambda x: x) 
+    else:
+        final_df = df
 
-def plot_acceleration_subplots(df):
-    soreted_df = df.sort_index()
-    soreted_df[['x','y','z','mag']].plot(figsize=(40,30), grid=True, subplots=True, legend=True, ylim=[-2500,6000])
+    if field == None:
+        suffix = ''
+    else: 
+        suffix = '_'+field
+    min_values = [
+        final_df['x'+suffix].min(),
+        final_df['y'+suffix].min(),
+        final_df['z'+suffix].min(),
+        final_df['mag'+suffix].min()
+    ]
+    return min(min_values)
+
+def _get_max_value(df, field=None):
+    if type(df) == pd.core.groupby.generic.DataFrameGroupBy:
+        final_df = df.apply(lambda x: x) 
+    else:
+        final_df = df
+    if field == None:
+        suffix = ''
+    else: 
+        suffix = '_'+field
+    min_values = [
+        final_df['x'+suffix].max(),
+        final_df['y'+suffix].max(),
+        final_df['z'+suffix].max(),
+        final_df['mag'+suffix].max()
+    ]
+    return max(min_values)
+
+def plot_acceleration(df, subplots=True):
+#    soreted_df = df.sort_index() . ---- 'DataFrameGroupBy' object has no attribute 'sort_index'
+    if subplots:
+        figsize=(40,30)
+    else:
+        figsize=(10,5)
+
+    min_value = _get_min_value(df)
+    max_value = _get_max_value(df)
+
+    df[['x','y','z','mag','duration']].plot(x='duration', figsize=figsize, grid=True, subplots=subplots, legend=True, ylim=[min_value,max_value])
 
 def plot_feature_columns(df, class_key, field):
     fig, ax =plt.subplots(1,2)
     fig.set_size_inches(20, 5)
     fig.suptitle(field)
-    max_values = [
-        df['x_'+field].max(),
-        df['y_'+field].max(),
-        df['z_'+field].max(),
-        df['mag_'+field].max()
-    ]
-    min_values = [
-        df['x_'+field].min(),
-        df['y_'+field].min(),
-        df['z_'+field].min(),
-        df['mag_'+field].min()
-    ]
-    ax[0].set_ylim(min(min_values), max(max_values))
-    ax[1].set_ylim(min(min_values), max(max_values))
+
+    min_value = _get_min_value(df, field)
+    max_value = _get_max_value(df, field)
+    ax[0].set_ylim(min_value, max_value)
+    ax[1].set_ylim(min_value, max_value)
+
     df_grouped = df.groupby(class_key)[['x_'+field,'y_'+field,'z_'+field,'mag_'+field]]
     df_grouped.boxplot(fontsize=20, ax=ax)  
