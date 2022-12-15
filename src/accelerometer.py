@@ -195,4 +195,20 @@ def plot_feature_columns(df, class_key, field):
     ax[1].set_ylim(min_value, max_value)
 
     df_grouped = df.groupby(class_key)[['x_'+field,'y_'+field,'z_'+field,'mag_'+field]]
-    df_grouped.boxplot(fontsize=20, ax=ax)  
+    df_grouped.boxplot(fontsize=20, ax=ax)
+
+def _box_plot_acceleration_single(df, field=''):
+    if field != '':
+        final_df = df.groupby([field])['x', 'y', 'z', 'mag']
+    else:
+        final_df = df[['x', 'y', 'z', 'mag']]
+    final_df.boxplot()
+    plt.show()
+
+def box_plot_acceleration(df, field=''):
+    if type(df) is list or type(df) is set:
+        for single_df in df:
+            _box_plot_acceleration_single(single_df)
+    else:
+        _box_plot_acceleration_single(df)
+
