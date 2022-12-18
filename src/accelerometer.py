@@ -130,7 +130,7 @@ def plot_fourier_transformation(df, title=""):
     else:
         _plot_fourier_transformation_single(df, title)
 
-def _get_min_value(df, field=None):
+def _get_aggregate_min_value(df, field=None):
     if type(df) == pd.core.groupby.generic.DataFrameGroupBy:
         final_df = df.apply(lambda x: x) 
     else:
@@ -148,7 +148,29 @@ def _get_min_value(df, field=None):
     ]
     return min(min_values)
 
-def _get_max_value(df, field=None):
+def _get_min_value(df, fields=[]):
+    if type(df) == pd.core.groupby.generic.DataFrameGroupBy:
+        final_df = df.apply(lambda x: x) 
+    else:
+        final_df = df
+
+    min_values = []
+    for field in fields:
+        min_values.append(final_df[field].min())
+    return min(min_values)
+
+def _get_max_value(df, fields=[]):
+    if type(df) == pd.core.groupby.generic.DataFrameGroupBy:
+        final_df = df.apply(lambda x: x) 
+    else:
+        final_df = df
+
+    min_values = []
+    for field in fields:
+        min_values.append(final_df[field].max())
+    return max(min_values)
+
+def _get_aggregate_max_value(df, field=None):
     if type(df) == pd.core.groupby.generic.DataFrameGroupBy:
         final_df = df.apply(lambda x: x) 
     else:
@@ -172,8 +194,8 @@ def _plot_acceleration_single(df, subplots=True):
     else:
         figsize=(10,5)
 
-    min_value = _get_min_value(df)
-    max_value = _get_max_value(df)
+    min_value = _get_min_value(df, ['x','y','z','mag'])
+    max_value = _get_max_value(df, ['x','y','z','mag'])
 
     df[['x','y','z','mag','duration']].plot(x='duration', figsize=figsize, grid=True, subplots=subplots, legend=True, ylim=[min_value,max_value])
 
@@ -189,26 +211,31 @@ def plot_feature_columns(df, class_key, field):
     fig.set_size_inches(20, 5)
     fig.suptitle(field)
 
-    min_value = _get_min_value(df, field)
-    max_value = _get_max_value(df, field)
+    features = ['x_'+field,'y_'+field,'z_'+field,'mag_'+field]
+
+    min_value = _get_min_value(df, features)
+    max_value = _get_max_value(df, features)
     ax[0].set_ylim(min_value, max_value)
     ax[1].set_ylim(min_value, max_value)
 
-    df_grouped = df.groupby(class_key)[['x_'+field,'y_'+field,'z_'+field,'mag_'+field]]
+    df_grouped = df.groupby(class_key)[features]
     df_grouped.boxplot(fontsize=20, ax=ax)
 
-def _box_plot_acceleration_single(df, field=''):
-    if field != '':
-        final_df = df.groupby([field])['x', 'y', 'z', 'mag']
+def _box_plot_acceleration_single(df, class_key, columns):
+    if class_key != '':
+        fig, ax =plt.subplots(1,2)
+        fig.set_size_inches(30, 5)
+        final_df = df.groupby([class_key])[columns]
+        final_df.boxplot(fontsize=20, ax=ax)
     else:
-        final_df = df[['x', 'y', 'z', 'mag']]
-    final_df.boxplot()
+        df[columns].boxplot(fontsize=20)
+    
     plt.show()
 
-def box_plot_acceleration(df, field=''):
+def box_plot_acceleration(df, class_key='', columns=['x', 'y', 'z', 'mag']):
     if type(df) is list or type(df) is set:
         for single_df in df:
-            _box_plot_acceleration_single(single_df)
+            _box_plot_acceleration_single(single_df,class_key,columns)
     else:
-        _box_plot_acceleration_single(df)
+        _box_plot_acceleration_single(df,class_key,columns)
 

@@ -1,6 +1,7 @@
 import json
 from src.file_handling import extract_subject, extract_simple_file_name
 from src.accelerometer import calc_magnitude
+from src.file_processing import extract_age_group
 
 
 def _process_accelerations(base_record, start_time, accelerations):
@@ -35,9 +36,9 @@ def process_drift_file(file_name):
     data = []
 
     subject = extract_subject(file_name)
+    age_group = extract_age_group(subject)
     simple_file_name = extract_simple_file_name(file_name)
     uuid = json_data['uuid']
-    start_time = json_data['startTime']
     dominant_hand_device = json_data['dominantDevice']
     non_dominant_hand_device = json_data['nonDominantDevice']
 
@@ -48,6 +49,7 @@ def process_drift_file(file_name):
             device = non_dominant_hand_device
         base_record = {
             'subject': subject,
+            'age_group': age_group,
             'file': simple_file_name,
             'uuid': uuid,
             'hand': hand,
@@ -56,5 +58,6 @@ def process_drift_file(file_name):
         hand_accelerations = accelerations[hand]
         if len(hand_accelerations) <= 0:
             return None
+        start_time = hand_accelerations[0]['timeStamp']
         data = data + _process_accelerations(base_record,start_time, hand_accelerations)
     return data
