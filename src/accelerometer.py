@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 
 from src.velocity_peaks import velocity_peaks
 from src.spectral_arc_length import spectral_arc_length
+from src.pandas_util import get_min_value_across_columns, get_max_value_across_columns
+from src.plotting import box_plot_columns
 
 def _fourier_transformation(acceleration_df):
     values = acceleration_df['mag'].tolist()
@@ -130,63 +132,6 @@ def plot_fourier_transformation(df, title=""):
     else:
         _plot_fourier_transformation_single(df, title)
 
-def _get_aggregate_min_value(df, field=None):
-    if type(df) == pd.core.groupby.generic.DataFrameGroupBy:
-        final_df = df.apply(lambda x: x) 
-    else:
-        final_df = df
-
-    if field == None:
-        suffix = ''
-    else: 
-        suffix = '_'+field
-    min_values = [
-        final_df['x'+suffix].min(),
-        final_df['y'+suffix].min(),
-        final_df['z'+suffix].min(),
-        final_df['mag'+suffix].min()
-    ]
-    return min(min_values)
-
-def _get_min_value(df, fields=[]):
-    if type(df) == pd.core.groupby.generic.DataFrameGroupBy:
-        final_df = df.apply(lambda x: x) 
-    else:
-        final_df = df
-
-    min_values = []
-    for field in fields:
-        min_values.append(final_df[field].min())
-    return min(min_values)
-
-def _get_max_value(df, fields=[]):
-    if type(df) == pd.core.groupby.generic.DataFrameGroupBy:
-        final_df = df.apply(lambda x: x) 
-    else:
-        final_df = df
-
-    min_values = []
-    for field in fields:
-        min_values.append(final_df[field].max())
-    return max(min_values)
-
-def _get_aggregate_max_value(df, field=None):
-    if type(df) == pd.core.groupby.generic.DataFrameGroupBy:
-        final_df = df.apply(lambda x: x) 
-    else:
-        final_df = df
-    if field == None:
-        suffix = ''
-    else: 
-        suffix = '_'+field
-    min_values = [
-        final_df['x'+suffix].max(),
-        final_df['y'+suffix].max(),
-        final_df['z'+suffix].max(),
-        final_df['mag'+suffix].max()
-    ]
-    return max(min_values)
-
 def _plot_acceleration_single(df, subplots=True):
 #    soreted_df = df.sort_index() . ---- 'DataFrameGroupBy' object has no attribute 'sort_index'
     if subplots:
@@ -194,8 +139,8 @@ def _plot_acceleration_single(df, subplots=True):
     else:
         figsize=(10,5)
 
-    min_value = _get_min_value(df, ['x','y','z','mag'])
-    max_value = _get_max_value(df, ['x','y','z','mag'])
+    min_value = get_min_value_across_columns(df, ['x','y','z','mag'])
+    max_value = get_max_value_across_columns(df, ['x','y','z','mag'])
 
     df[['x','y','z','mag','duration']].plot(x='duration', figsize=figsize, grid=True, subplots=subplots, legend=True, ylim=[min_value,max_value])
 
@@ -206,36 +151,6 @@ def plot_acceleration(df, subplots=True):
     else:
         _plot_acceleration_single(df, subplots)
 
-def plot_feature_columns(df, class_key, field):
-    fig, ax =plt.subplots(1,2)
-    fig.set_size_inches(20, 5)
-    fig.suptitle(field)
-
+def plot_feature_columns(df, field, class_key='age_group'):
     features = ['x_'+field,'y_'+field,'z_'+field,'mag_'+field]
-
-    min_value = _get_min_value(df, features)
-    max_value = _get_max_value(df, features)
-    ax[0].set_ylim(min_value, max_value)
-    ax[1].set_ylim(min_value, max_value)
-
-    df_grouped = df.groupby(class_key)[features]
-    df_grouped.boxplot(fontsize=20, ax=ax)
-
-def _box_plot_acceleration_single(df, class_key, columns):
-    if class_key != '':
-        fig, ax =plt.subplots(1,2)
-        fig.set_size_inches(30, 5)
-        final_df = df.groupby([class_key])[columns]
-        final_df.boxplot(fontsize=20, ax=ax)
-    else:
-        df[columns].boxplot(fontsize=20)
-    
-    plt.show()
-
-def box_plot_acceleration(df, class_key='', columns=['x', 'y', 'z', 'mag']):
-    if type(df) is list or type(df) is set:
-        for single_df in df:
-            _box_plot_acceleration_single(single_df,class_key,columns)
-    else:
-        _box_plot_acceleration_single(df,class_key,columns)
-
+    box_plot_columns(df,class_key,features)
