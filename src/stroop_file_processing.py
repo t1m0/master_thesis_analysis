@@ -32,6 +32,9 @@ def process_stroop_file(file_path):
 
     clicks = json_data['gameSession']['clicks']
     start_time = json_data['gameSession']['startTime']
+    click_distance_mean = json_data['meanDistance']
+    click_distance_std = json_data['distanceStandardDeviation']
+    click_success_rate = json_data['successRate']
     clicks_time_stamps = []
     for click in clicks:
         clicks_time_stamps.append(click['timeStamp'])
@@ -51,6 +54,9 @@ def process_stroop_file(file_path):
             'uuid':uuid,
             'hand': hand,
             'device': device,
+            'click_distance_mean': click_distance_mean,
+            'click_distance_std': click_distance_std,
+            'click_success_rate': click_success_rate,
             'click_number':click_number,
             'duration':duration,
             'time_stamp':time_stamp,
