@@ -3,7 +3,7 @@ from src.file_handling import extract_subject, extract_simple_file_name
 from src.accelerometer import calc_magnitude
 from src.file_processing import extract_age_group
 
-def process_spiral_file(file_name):
+def process_spiral_accelerometer_file(file_name):
     file = open(file_name)
     json_data = json.load(file)
     file.close()
@@ -21,10 +21,6 @@ def process_spiral_file(file_name):
     device = json_data['device']
     uuid = json_data['drawing']['uuid']
     start_time = json_data['drawing']['startTime']
-    first_order_smoothness =json_data['result']["firstOrderSmoothness"]
-    second_order_smoothness = json_data['result']["secondOrderSmoothness"]
-    thightness = json_data['result']["thightness"]
-    zero_crossing_rate = json_data['result']["zeroCrossingRate"]
 
     for acceleration in accelerations:
         x=acceleration['xAxis']
@@ -40,6 +36,49 @@ def process_spiral_file(file_name):
             'uuid':uuid,
             'hand': hand,
             'device': device,
+            'time_stamp':time_stamp,
+            'duration':duration,
+            'x':x,
+            'y':y,
+            'z':z,
+            'mag':mag
+        }
+        data.append(pandas_row)
+    return data
+
+def process_spiral_drawing_file(file_name):
+    file = open(file_name)
+    json_data = json.load(file)
+    file.close()
+    coordinates = json_data['drawing']['imageWrapper']['coordinates']
+    
+    if len(coordinates) <= 0: 
+        return None
+
+    data = []
+
+    subject = extract_subject(file_name)
+    age_group = extract_age_group(subject)
+    simple_file_name = extract_simple_file_name(file_name)
+    hand = json_data['hand']
+    uuid = json_data['drawing']['uuid']
+    start_time = json_data['drawing']['startTime']
+    first_order_smoothness =json_data['result']["firstOrderSmoothness"]
+    second_order_smoothness = json_data['result']["secondOrderSmoothness"]
+    thightness = json_data['result']["thightness"]
+    zero_crossing_rate = json_data['result']["zeroCrossingRate"]
+
+    for coordinate in coordinates:
+        x=coordinate['x']
+        y=coordinate['y']
+        time_stamp=coordinate['timeStamp']
+        duration = time_stamp - start_time
+        pandas_row = {
+            'subject': subject,
+            'age_group': age_group,
+            'file': simple_file_name,
+            'uuid':uuid,
+            'hand': hand,
             'first_order_smoothness':first_order_smoothness,
             'second_order_smoothness':second_order_smoothness,
             'thightness':thightness,
@@ -47,9 +86,7 @@ def process_spiral_file(file_name):
             'time_stamp':time_stamp,
             'duration':duration,
             'x':x,
-            'y':y,
-            'z':z,
-            'mag':mag
+            'y':y
         }
         data.append(pandas_row)
     return data
