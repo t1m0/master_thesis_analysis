@@ -74,3 +74,18 @@ def svc_time_series(sequences, labels):
     model = TimeSeriesSVC(C=1.0, kernel="gak")
     model.fit(sequences, labels)
     return model
+
+def _median_filter_on_session(df, window, columns):
+    df_copy = df.copy()
+    for column in columns:
+        df_copy[column] = df_copy[column].rolling(center=True, window=window).median()
+    df_copy = df_copy.dropna()
+    return df_copy
+
+def median_filter(df, session_identifier='uuid', window=3, columns=['x','y','z','mag']):
+    new_df = pd.DataFrame(data=None, columns=df.columns)
+    for current_session_identifier in df[session_identifier].unique():
+        current_session_df = df[df[session_identifier] == current_session_identifier]
+        filtered_df = _median_filter_on_session(current_session_df,window, columns)
+        new_df = pd.concat([new_df, filtered_df])
+    return new_df
