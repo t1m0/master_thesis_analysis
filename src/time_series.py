@@ -6,8 +6,12 @@ from keras.layers import Dense
 from keras.layers import LSTM
 from keras.losses import BinaryCrossentropy
 
+from sklearn.model_selection import train_test_split
+
 from tslearn.neighbors import KNeighborsTimeSeriesClassifier
 from tslearn.svm import TimeSeriesSVC
+
+from src.ml_util import evaluate_model
 
 
 def _preprocess_data(df, sequence_column, class_column, feature_columns):
@@ -21,11 +25,7 @@ def _preprocess_data(df, sequence_column, class_column, feature_columns):
         sequence = current_df[feature_columns].values
         sequences_length.append(len(sequence))
         sequences_features.append(sequence)
-    return {
-        'sequences': sequences_features,
-        'length': sequences_length,
-        'labels': sequences_labels
-    }
+    return sequences_features,sequences_length,sequences_labels
 
 
 def align_sequences_to_same_length(sequences, target_length):
@@ -46,13 +46,10 @@ def align_sequences_to_same_length(sequences, target_length):
 
 
 def compile_sequences(df, sequence_column='uuid', class_column='age_group', feature_columns=['x', 'y', 'z', 'mag']):
-    preprocessed_data = _preprocess_data(df, sequence_column, class_column, feature_columns)
-    target_length = np.int_(pd.Series(preprocessed_data['length']).quantile(0.9))
-    aligned_sequences = align_sequences_to_same_length(preprocessed_data['sequences'], target_length)
-    return {
-        'sequences': aligned_sequences,
-        'labels': preprocessed_data['labels']
-    }
+    sequences,length,labels = _preprocess_data(df, sequence_column, class_column, feature_columns)
+    target_length = np.int_(pd.Series(length).quantile(0.9))
+    aligned_sequences = align_sequences_to_same_length(sequences, target_length)
+    return  aligned_sequences,labels
 
 def long_short_term_memory(sequences, labels):
     #https://www.analyticsvidhya.com/blog/2019/01/introduction-time-series-classification/
@@ -74,6 +71,38 @@ def svc_time_series(sequences, labels):
     model = TimeSeriesSVC(C=1.0, kernel="gak")
     model.fit(sequences, labels)
     return model
+
+def run_time_series_algorithms(df, session_identifier='uuid', compile_sequences_function=compile_sequences):
+    df_copy = df.copy()
+    df_copy['age_group'].replace(to_replace=30,value=1,inplace=True)
+    df_copy['age_group'].replace(to_replace=50,value=0,inplace=True)
+    train_index, test_index = train_test_split(range(len(df_copy[session_identifier].unique())), test_size=0.15)
+
+    sequences, labels = compile_sequences_function(df_copy)
+    
+    train_sequences = [sequences[i] for i in train_index]
+    test_sequences = [sequences[i] for i in test_index]
+
+    train_labels = [labels[i] for i in train_index]
+    test_labels = [labels[i] for i in test_index]
+
+    results = {}
+
+    print("Training LSTM")
+    model = long_short_term_memory(train_sequences, train_labels)
+    accuracy = evaluate_model(model, np.array(test_sequences),test_labels, lambda predictions : [round(prediction[0]) for prediction in predictions])
+    print(f"LSTM accuracy: {accuracy}")
+    results['long_short_term_memory'] = accuracy
+
+    # KNN
+    print("Training KNN")
+    model = knn_time_series(train_sequences,train_labels)
+    results['knn_time_series'] = evaluate_model(model, test_sequences,test_labels)
+    print(f"KNN accuracy: {accuracy}")
+    results['knn_time_series'] = accuracy
+    return results
+
+
 
 def _median_filter_on_session(df, window, columns):
     df_copy = df.copy()
