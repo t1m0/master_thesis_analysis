@@ -1,16 +1,19 @@
+import pandas as pd
+
 from sklearn.cluster import KMeans
-from dtaidistance import dtw
-from dtaidistance import dtw_visualisation as dtwvis
-import random
-import numpy as np
-import sys
-import numpy as np
-
-
-
 
 def kmeans(df, feature_keys):
     train_df = df.reset_index(drop=False)
     features = train_df[feature_keys]
     kmeans = KMeans(n_clusters=2).fit(features)
     return kmeans
+
+def evaluate_kmeans_model(model, features, classes):
+    kmeans_predicitons = model.predict(features)
+    predictions_df = pd.DataFrame()
+    predictions_df['age_group'] = classes
+    predictions_df['cluster'] = kmeans_predicitons
+    accuracy = (1-(predictions_df.groupby('age_group')[['cluster']].agg('sem').sum().values[0]/2))
+    return accuracy
+
+

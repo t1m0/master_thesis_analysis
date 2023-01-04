@@ -6,6 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
 def principal_component_analysis(df, feature_keys):
+    # https://stackoverflow.com/questions/22984335/recovering-features-names-of-explained-variance-ratio-in-pca-with-sklearn 
     feature_df = df[feature_keys]
     x = feature_df.values
     x = StandardScaler().fit_transform(x) # normalizing the features
