@@ -37,8 +37,9 @@ def process_stroop_file(file_path):
     click_success_rate = json_data['successRate']
     clicks_time_stamps = []
     for click in clicks:
-        clicks_time_stamps.append(click['timeStamp'])
-        
+        if click['valid']:
+            clicks_time_stamps.append(click['timeStamp'])
+
     for acceleration in accelerations:
         time_stamp = acceleration['timeStamp']
         click_number = _find_click_number(clicks_time_stamps, time_stamp)
