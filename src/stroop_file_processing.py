@@ -9,7 +9,7 @@ def _find_click_number(clicks_time_stamps, current_time_stamp):
         if clicks_time_stamps[i] > current_time_stamp:
             break
         else:
-            click_number = i
+            click_number = (i+1)
     return click_number
 
 def process_stroop_file(file_path):
@@ -38,7 +38,7 @@ def process_stroop_file(file_path):
     clicks_time_stamps = []
     for click in clicks:
         clicks_time_stamps.append(click['timeStamp'])
-
+        
     for acceleration in accelerations:
         time_stamp = acceleration['timeStamp']
         click_number = _find_click_number(clicks_time_stamps, time_stamp)
