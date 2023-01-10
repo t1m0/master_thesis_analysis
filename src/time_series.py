@@ -6,10 +6,11 @@ from keras.layers import Dense
 from keras.layers import LSTM
 from keras.losses import BinaryCrossentropy
 
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import ShuffleSplit
 
 from tslearn.neighbors import KNeighborsTimeSeriesClassifier
 from tslearn.svm import TimeSeriesSVC
+from tslearn.metrics import dtw
 
 from src.ml_util import evaluate_model
 
@@ -72,34 +73,40 @@ def svc_time_series(sequences, labels):
     model.fit(sequences, labels)
     return model
 
-def run_time_series_algorithms(df, session_identifier='uuid', compile_sequences_function=compile_sequences):
+def run_time_series_algorithms(df, session_identifier='uuid', compile_sequences_function=compile_sequences, cross_validations=10):
     df_copy = df.copy()
     df_copy['age_group'].replace(to_replace=30,value=1,inplace=True)
     df_copy['age_group'].replace(to_replace=50,value=0,inplace=True)
-    train_index, test_index = train_test_split(range(len(df_copy[session_identifier].unique())), test_size=0.15)
 
     sequences, labels = compile_sequences_function(df_copy)
+
+    shuffle_split = ShuffleSplit(n_splits=cross_validations, test_size=0.20, random_state=0)
     
-    train_sequences = [sequences[i] for i in train_index]
-    test_sequences = [sequences[i] for i in test_index]
+    results = {'long_short_term_memory':[], 'knn_time_series':[]}
 
-    train_labels = [labels[i] for i in train_index]
-    test_labels = [labels[i] for i in test_index]
+    for train_index, test_index in shuffle_split.split(range(len(labels))):
+        train_sequences = [sequences[i] for i in train_index]
+        test_sequences = [sequences[i] for i in test_index]
 
-    results = {}
+        train_labels = [labels[i] for i in train_index]
+        test_labels = [labels[i] for i in test_index]
 
-    print("Training LSTM")
-    model = long_short_term_memory(train_sequences, train_labels)
-    accuracy = evaluate_model(model, np.array(test_sequences),test_labels, lambda predictions : [round(prediction[0]) for prediction in predictions])
-    print(f"LSTM accuracy: {accuracy}")
-    results['long_short_term_memory'] = accuracy
+        # Long Short Term Memory
+        model = long_short_term_memory(train_sequences, train_labels)
+        accuracy = evaluate_model(model, np.array(test_sequences),test_labels, lambda predictions : [round(prediction[0]) for prediction in predictions])
+        results['long_short_term_memory'].append(accuracy)
 
-    # KNN
-    print("Training KNN")
-    model = knn_time_series(train_sequences,train_labels)
-    results['knn_time_series'] = evaluate_model(model, test_sequences,test_labels)
-    print(f"KNN accuracy: {accuracy}")
-    results['knn_time_series'] = accuracy
+        # K Nearest Neighbor
+        model = knn_time_series(train_sequences,train_labels)
+        accuracy = evaluate_model(model, test_sequences,test_labels)
+        results['knn_time_series'].append(accuracy)
+    
+    for key in results.keys():
+        array = results[key]
+        print(f"{key} single accuracy: {array}")
+        mean_accuracy = np.mean(array)
+        print(f"{key} mean accuracy: {mean_accuracy}")
+        results[key] = mean_accuracy
     return results
 
 
