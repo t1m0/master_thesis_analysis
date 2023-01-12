@@ -132,24 +132,51 @@ def plot_fourier_transformation(df, title=""):
     else:
         _plot_fourier_transformation_single(df, title)
 
-def _plot_acceleration_single(df, subplots=True):
-#    soreted_df = df.sort_index() . ---- 'DataFrameGroupBy' object has no attribute 'sort_index'
-    if subplots:
-        figsize=(40,30)
-    else:
-        figsize=(10,5)
+def _plot_acceleration_single_subplot(df):
+    
+    figsize=(10,5)
 
-    min_value = get_min_value_across_columns(df, ['x','y','z','mag'])
-    max_value = get_max_value_across_columns(df, ['x','y','z','mag'])
+    min_value = get_min_value_across_columns(df, ['x','y','z','mag'],0.1)
+    max_value = get_max_value_across_columns(df, ['x','y','z','mag'],0.1)
+    
+    df[['x','y','z','mag','duration']].plot(x='duration', figsize=figsize, grid=True, subplots=True, legend=True, ylim=[min_value,max_value])
+    
 
-    df[['x','y','z','mag','duration']].plot(x='duration', figsize=figsize, grid=True, subplots=subplots, legend=True, ylim=[min_value,max_value])
+def _plot_acceleration(df):
+    plt.plot(df['duration'].tolist(), df['x'].tolist(), color='blue', label ="x", linestyle='solid')
+    plt.plot(df['duration'].tolist(), df['y'].tolist(), color='orange', label="y", linestyle='dashed')
+    plt.plot(df['duration'].tolist(), df['z'].tolist(), color='green', label="z", linestyle='dotted')
 
-def plot_acceleration(df, subplots=True):
+def _plot_acceleration_single_plot(df,title,additional_plotting):
+
+    min_value = get_min_value_across_columns(df, ['x','y','z','mag'],0.1)
+    max_value = get_max_value_across_columns(df, ['x','y','z','mag'],0.1)
+
+    plt.ylim(min_value,max_value)
+
+    for uuid in df['uuid'].unique():
+        session_df = df[df['uuid']==uuid]
+        _plot_acceleration(session_df)
+    additional_plotting(df)
+    if len(df['uuid'].unique()) <= 1:
+        plt.legend()
+    if title != None:
+        plt.title(title)
+    plt.show()
+
+def _plot_acceleration_sub_plot(df):
     if type(df) is list or type(df) is set:
         for single_df in df:
-            _plot_acceleration_single(single_df, subplots)
+            _plot_acceleration_single_subplot(single_df)
     else:
-        _plot_acceleration_single(df, subplots)
+        _plot_acceleration_single_subplot(df)
+
+def plot_acceleration(df, subplots=True, title=None, additional_plotting=lambda df:()):
+    if subplots:
+        _plot_acceleration_sub_plot(df)
+    else:
+        _plot_acceleration_single_plot(df, title,additional_plotting)
+    
 
 def plot_feature_columns(df, field, class_key='age_group'):
     features = ['x_'+field,'y_'+field,'z_'+field,'mag_'+field]

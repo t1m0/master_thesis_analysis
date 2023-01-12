@@ -1,26 +1,38 @@
 import pandas as pd
 
-def get_min_value_across_columns(df, fields=[]):
+def _get_x_value_across_columns(df,function, fields, lower_padding, upper_padding):
     if type(df) == pd.core.groupby.generic.DataFrameGroupBy:
         final_df = df.apply(lambda x: x) 
     else:
         final_df = df
 
-    min_values = []
+    values = []
     for field in fields:
-        min_values.append(final_df[field].min())
-    return min(min_values)
-
-def get_max_value_across_columns(df, fields=[]):
-    if type(df) == pd.core.groupby.generic.DataFrameGroupBy:
-        final_df = df.apply(lambda x: x) 
+        column_values = final_df[field]
+        values.append(function(column_values))
+    
+    value = function(values)
+    
+    if value < 0:
+        value = value * lower_padding
     else:
-        final_df = df
+        value = value * upper_padding
 
-    min_values = []
-    for field in fields:
-        min_values.append(final_df[field].max())
-    return max(min_values)
+    return value
+
+def get_min_value_across_columns(df, fields=[],padding=0):
+
+    lower_padding = 1+padding
+    upper_padding = 1-padding
+    
+    return _get_x_value_across_columns(df,min,fields=fields,lower_padding=lower_padding, upper_padding=upper_padding)
+
+def get_max_value_across_columns(df, fields=[],padding=0):
+    
+    lower_padding = 1-padding
+    upper_padding = 1+padding
+    
+    return _get_x_value_across_columns(df,max,fields=fields,lower_padding=lower_padding, upper_padding=upper_padding)
 
 def drop_outliers_of_columns(df, columns):
     df_new = df.copy()
