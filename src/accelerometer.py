@@ -132,7 +132,7 @@ def plot_fourier_transformation(df, title=""):
     else:
         _plot_fourier_transformation_single(df, title)
 
-def _plot_acceleration_single_subplot(df):
+def _plot_acceleration_sub_plot(df):
     
     figsize=(10,5)
 
@@ -164,18 +164,19 @@ def _plot_acceleration_single_plot(df,title,additional_plotting):
         plt.title(title)
     plt.show()
 
-def _plot_acceleration_sub_plot(df):
-    if type(df) is list or type(df) is set:
-        for single_df in df:
-            _plot_acceleration_single_subplot(single_df)
-    else:
-        _plot_acceleration_single_subplot(df)
-
-def plot_acceleration(df, subplots=True, title=None, additional_plotting=lambda df:()):
+def _plot_acceleration_single(df, subplots, title, additional_plotting):
     if subplots:
         _plot_acceleration_sub_plot(df)
     else:
         _plot_acceleration_single_plot(df, title,additional_plotting)
+
+def plot_acceleration(df, subplots=True, title=None, additional_plotting=lambda df:()):
+    if type(df) is list or type(df) is set:
+        for single_df in df:
+            _plot_acceleration_single(single_df,subplots=subplots, title=title, additional_plotting=additional_plotting)
+    else:
+        _plot_acceleration_single(df,subplots=subplots, title=title, additional_plotting=additional_plotting)
+    
     
 
 def plot_feature_columns(df, field, class_key='age_group'):

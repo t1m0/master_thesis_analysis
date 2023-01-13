@@ -29,11 +29,7 @@ def dummy_classifier(df, feature_keys, neighbors=3):
 def run_feature_algorithms(df, feature_keys, cross_validations=10):
     df_copy = df.copy()
     df_copy = df_copy.reset_index(drop=False)
-    df_copy['age_group'].replace(to_replace=30,value=1,inplace=True)
-    df_copy['age_group'].replace(to_replace=50,value=0,inplace=True)
-    if 'hand' in feature_keys:
-        df_copy['hand'].replace(to_replace='dominant',value=1,inplace=True)
-        df_copy['hand'].replace(to_replace='non_dominant',value=0,inplace=True)
+    
     instance_count = len(df)
     shuffle_split = ShuffleSplit(
         n_splits=cross_validations, test_size=0.20, random_state=0)

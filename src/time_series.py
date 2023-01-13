@@ -75,8 +75,6 @@ def svc_time_series(sequences, labels):
 
 def run_time_series_algorithms(df, session_identifier='uuid', compile_sequences_function=compile_sequences, cross_validations=10):
     df_copy = df.copy()
-    df_copy['age_group'].replace(to_replace=30,value=1,inplace=True)
-    df_copy['age_group'].replace(to_replace=50,value=0,inplace=True)
 
     sequences, labels = compile_sequences_function(df_copy)
 
