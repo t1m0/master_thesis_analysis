@@ -162,6 +162,8 @@ def _plot_acceleration_single_plot(df,title,additional_plotting):
         plt.legend()
     if title != None:
         plt.title(title)
+    plt.ylabel('acceleration')
+    plt.xlabel('duration')
     plt.show()
 
 def _plot_acceleration_single(df, subplots, title, additional_plotting):
@@ -172,8 +174,14 @@ def _plot_acceleration_single(df, subplots, title, additional_plotting):
 
 def plot_acceleration(df, subplots=True, title=None, additional_plotting=lambda df:()):
     if type(df) is list or type(df) is set:
+        index = 0
         for single_df in df:
-            _plot_acceleration_single(single_df,subplots=subplots, title=title, additional_plotting=additional_plotting)
+            if title != None:
+                local_title = title[index]
+            else:
+                local_title = None
+            _plot_acceleration_single(single_df,subplots=subplots, title=local_title, additional_plotting=additional_plotting)
+            index+=1
     else:
         _plot_acceleration_single(df,subplots=subplots, title=title, additional_plotting=additional_plotting)
     

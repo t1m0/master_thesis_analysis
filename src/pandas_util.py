@@ -59,3 +59,22 @@ def only_numeric_columns(df,columns = []):
         if df[column].dtype in [float,int]:
             numeric_columns.append(column)
     return numeric_columns
+
+def extract_subject_dataframe(df,age_group,subject_index=-1):
+    subject = df[df['age_group']==age_group]['subject'].unique()[subject_index]
+    subject_df = df[df['subject'] == subject]
+    return subject_df
+
+def extract_subject_dataframes(df,subject_index=-1):
+    subject_30_df = extract_subject_dataframe(df,30,subject_index)
+    subject_50_df = extract_subject_dataframe(df,50,subject_index)
+    return subject_30_df, subject_50_df
+
+
+def extract_sample_sessions(df,subject_index=-1,session_index=-1):
+    subject_30_df, subject_50_df = extract_subject_dataframes(df, subject_index)
+    uuid_30 = subject_30_df['uuid'].unique()[session_index]
+    uuid_50 = subject_50_df['uuid'].unique()[session_index]
+    single_session_30_df = df[df['uuid'] == uuid_30]
+    single_session_50_df = df[df['uuid'] == uuid_50]
+    return single_session_30_df, single_session_50_df
