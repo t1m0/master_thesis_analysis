@@ -8,10 +8,8 @@ from sklearn.dummy import DummyClassifier
 from src.kmeans import kmeans, evaluate_kmeans_model
 from src.decision_tree import decision_tree
 from src.k_neighbors import k_neighbors
-from src.multi_layer_perceptron import multi_layer_perceptron
 from src.support_vector_machine import support_vector_machine
-from src.stochastic_gradient_descent import stochastic_gradient_descent
-
+from src.random_forest import random_forest
 
 def evaluate_model(model, features, labels, prediction_correction=lambda x: x):
     predictions = model.predict(features)
@@ -31,10 +29,8 @@ def run_feature_algorithms(df, feature_keys, cross_validations=10):
     df_copy = df_copy.reset_index(drop=False)
     
     instance_count = len(df)
-    shuffle_split = ShuffleSplit(
-        n_splits=cross_validations, test_size=0.20, random_state=0)
-    results = {'dummy': [], 'kmeans': [], 'decision_tree': [], 'k_neighbors': [], 'multi_layer_perceptron': [
-    ], 'support_vector_machine': [], 'stochastic_gradient_descent': []}
+    shuffle_split = ShuffleSplit(n_splits=cross_validations, test_size=0.20, random_state=0)
+    results = {'dummy': [], 'kmeans': [], 'decision_tree': [], 'k_neighbors': [], 'random_forest': [], 'support_vector_machine': []}
     for train_index, test_index in shuffle_split.split(range(instance_count)):
         train_df = df_copy.iloc[train_index]
         test_df = df_copy.iloc[test_index]
@@ -58,25 +54,20 @@ def run_feature_algorithms(df, feature_keys, cross_validations=10):
         accuracy = evaluate_model(dt_model, test_features, test_labels)
         results['decision_tree'].append(accuracy)
 
+        # Random Forest
+        rf_model = random_forest(train_df, feature_keys)
+        accuracy = evaluate_model(dt_model, test_features, test_labels)
+        results['random_forest'].append(accuracy)
+
         # K Neighbors
         kn_model = k_neighbors(train_df, feature_keys)
         accuracy = evaluate_model(kn_model, test_features, test_labels)
         results['k_neighbors'].append(accuracy)
 
-        # Multi Layer Perceptron
-        kn_model = multi_layer_perceptron(train_df, feature_keys)
-        accuracy = evaluate_model(kn_model, test_features, test_labels)
-        results['multi_layer_perceptron'].append(accuracy)
-
         # Support Vector Machine
         svc_model = support_vector_machine(train_df, feature_keys)
         accuracy = evaluate_model(svc_model, test_features, test_labels)
         results['support_vector_machine'].append(accuracy)
-
-        # Stochastic Gradient Descent
-        sgd_model = stochastic_gradient_descent(train_df, feature_keys)
-        accuracy = evaluate_model(sgd_model, test_features, test_labels)
-        results['stochastic_gradient_descent'].append(accuracy)
 
     for key in results.keys():
         array = results[key]
