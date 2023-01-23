@@ -47,9 +47,19 @@ def drop_outliers_of_column(df, column, lower_quantile=0.10, upper_quantile=0.90
     df_new = df[(df[column] <= q_max) & (df[column] >= q_min)]
     return df_new
 
-def correlation_matrix(df, cut_off_correlation=0.8):
+def _correlation_matrix_style(v, upper_cut_off_correlation, lower_cut_off_correlation):
+    upper_cut_off = (v > upper_cut_off_correlation and v > 0) or (v < -upper_cut_off_correlation and v < 0)
+    lower_cut_off = (v < lower_cut_off_correlation and v > 0) or (v > -lower_cut_off_correlation and v < 0)
+    if upper_cut_off:
+        return "background: red"
+    elif lower_cut_off:
+        return "background: green"
+    else:
+        return "background: orange"
+
+def correlation_matrix(df, upper_cut_off_correlation=0.8,lower_cut_off_correlation=0.2):
     correlation_matrix = df.corr()
-    return correlation_matrix.style.apply(lambda x: ["background: red" if v > cut_off_correlation or v < -cut_off_correlation else "" for v in x], axis = 1).format(precision=2)
+    return correlation_matrix.style.apply(lambda x: [_correlation_matrix_style(v, upper_cut_off_correlation, lower_cut_off_correlation) for v in x], axis = 1).format(precision=2)
 
 def only_numeric_columns(df,columns = []):
     if len(columns) == 0:
