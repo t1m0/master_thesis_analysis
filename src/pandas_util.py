@@ -88,3 +88,20 @@ def extract_sample_sessions(df,subject_index=-1,session_index=-1):
     single_session_30_df = df[df['uuid'] == uuid_30]
     single_session_50_df = df[df['uuid'] == uuid_50]
     return single_session_30_df, single_session_50_df
+
+def split_by_column(df, column):
+    device_dfs = []
+    for device in df[column].unique():
+        mask = df[column] == device
+        current_df = df[mask]
+        device_dfs.append(current_df)
+    return device_dfs
+
+def reduce_to_one_session_for_subject(df):
+    df_copy = df.copy()
+    uuids = []
+    for subject in df_copy['subject']:
+        uuid = df_copy[df_copy['subject'] == subject]['uuid'].unique().any()
+        if uuid not in uuids:
+            uuids.append(uuid)
+    return df_copy[df_copy['uuid'].isin(uuids)]

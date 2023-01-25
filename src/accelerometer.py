@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 from src.velocity_peaks import velocity_peaks
 from src.spectral_arc_length import spectral_arc_length
@@ -132,14 +133,36 @@ def plot_fourier_transformation(df, title=""):
     else:
         _plot_fourier_transformation_single(df, title)
 
-def _plot_acceleration_sub_plot(df):
-    
-    figsize=(10,5)
+def _plot_acceleration_for_sub_plot(df, axis):
+    axis[0].plot(df['duration'].tolist(), df['x'].tolist(), color='blue', label ="x", linestyle='solid')
+    axis[1].plot(df['duration'].tolist(), df['y'].tolist(), color='orange', label="y", linestyle='dashed')
+    axis[2].plot(df['duration'].tolist(), df['z'].tolist(), color='green', label="z", linestyle='dotted')
 
+
+def _plot_acceleration_sub_plot(df, title,ymin,ymax):
     min_value = get_min_value_across_columns(df, ['x','y','z','mag'],0.1)
     max_value = get_max_value_across_columns(df, ['x','y','z','mag'],0.1)
+
+    figure, axis = plt.subplots(3, 1)
+    figure.set_size_inches(30, 15)    
     
-    df[['x','y','z','mag','duration']].plot(x='duration', figsize=figsize, grid=True, subplots=True, legend=True, ylim=[min_value,max_value])
+    if title != None:
+        figure.suptitle(title)
+
+    axis[0].legend([Line2D([0], [0], color='blue', linestyle='solid')], ['x'])
+    axis[1].legend([Line2D([0], [0], color='orange', linestyle='dashed')], ['y'])
+    axis[2].legend([Line2D([0], [0], color='green', linestyle='dotted')], ['z'])
+
+    plt.ylim(min_value,max_value)
+
+    for uuid in df['uuid'].unique():
+        session_df = df[df['uuid']==uuid]
+        _plot_acceleration_for_sub_plot(session_df, axis)
+    
+    plt.setp(axis, ylim=(ymin,ymax))
+    plt.ylabel('acceleration')
+    plt.xlabel('duration')
+    plt.show()
     
 
 def _plot_acceleration(df):
@@ -147,32 +170,51 @@ def _plot_acceleration(df):
     plt.plot(df['duration'].tolist(), df['y'].tolist(), color='orange', label="y", linestyle='dashed')
     plt.plot(df['duration'].tolist(), df['z'].tolist(), color='green', label="z", linestyle='dotted')
 
-def _plot_acceleration_single_plot(df,title,additional_plotting):
+def _plot_acceleration_single_plot(df,title, additional_plotting,ymin,ymax):
 
-    min_value = get_min_value_across_columns(df, ['x','y','z','mag'],0.1)
-    max_value = get_max_value_across_columns(df, ['x','y','z','mag'],0.1)
-
-    plt.ylim(min_value,max_value)
+    fig = plt.gcf()
+    fig.set_size_inches(30, 7.5)
+    plt.ylim(ymin,ymax)
 
     for uuid in df['uuid'].unique():
         session_df = df[df['uuid']==uuid]
         _plot_acceleration(session_df)
+    
+    lines = [Line2D([0], [0], color='blue', linestyle='solid'),Line2D([0], [0], color='orange', linestyle='dashed'),Line2D([0], [0], color='green', linestyle='dotted')]
+    plt.legend(lines, ['x','y','z'])
+
     additional_plotting(df)
-    if len(df['uuid'].unique()) <= 1:
-        plt.legend()
+    
     if title != None:
         plt.title(title)
     plt.ylabel('acceleration')
     plt.xlabel('duration')
     plt.show()
 
-def _plot_acceleration_single(df, subplots, title, additional_plotting):
+def _plot_acceleration_single(df, title, subplots, additional_plotting,ymin,ymax):
     if subplots:
-        _plot_acceleration_sub_plot(df)
+        _plot_acceleration_sub_plot(df, title,ymin,ymax)
     else:
-        _plot_acceleration_single_plot(df, title,additional_plotting)
+        _plot_acceleration_single_plot(df, title, additional_plotting,ymin,ymax)
+
+def _extrac_limits(df):
+    min_value = 0
+    max_value = 0
+    if type(df) is list or type(df) is set:
+        for single_df in df:
+            current_min_value = get_min_value_across_columns(single_df, ['x','y','z'],0.1)
+            current_max_value = get_max_value_across_columns(single_df, ['x','y','z'],0.1)
+            if current_min_value < min_value:
+                min_value = current_min_value
+            if current_max_value > max_value:
+                max_value = current_max_value
+    else:
+        min_value = get_min_value_across_columns(df, ['x','y','z'],0.1)
+        max_value = get_max_value_across_columns(df, ['x','y','z'],0.1)
+    return min_value, max_value
 
 def plot_acceleration(df, subplots=True, title=None, additional_plotting=lambda df:()):
+    min_value, max_value = _extrac_limits(df)
     if type(df) is list or type(df) is set:
         index = 0
         for single_df in df:
@@ -180,10 +222,11 @@ def plot_acceleration(df, subplots=True, title=None, additional_plotting=lambda 
                 local_title = title[index]
             else:
                 local_title = None
-            _plot_acceleration_single(single_df,subplots=subplots, title=local_title, additional_plotting=additional_plotting)
+            _plot_acceleration_single(single_df,subplots=subplots, title=local_title, additional_plotting=additional_plotting,ymin=min_value,ymax=max_value)
             index+=1
     else:
-        _plot_acceleration_single(df,subplots=subplots, title=title, additional_plotting=additional_plotting)
+        _plot_acceleration_single(df,subplots=subplots, title=title, additional_plotting=additional_plotting,ymin=min_value,ymax=max_value)
+    
     
     
 
