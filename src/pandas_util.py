@@ -7,6 +7,7 @@ def _get_x_value_across_columns(df,function, fields, lower_padding, upper_paddin
         final_df = df
 
     values = []
+    
     for field in fields:
         column_values = final_df[field]
         values.append(function(column_values))
@@ -72,7 +73,7 @@ def only_numeric_columns(df,columns = []):
 
 def extract_subject_dataframe(df,age_group,subject_index=-1):
     subject = df[df['age_group']==age_group]['subject'].unique()[subject_index]
-    subject_df = df[df['subject'] == subject]
+    subject_df = df[df['subject'] == subject] 
     return subject_df
 
 def extract_subject_dataframes(df,subject_index=-1):
@@ -83,8 +84,8 @@ def extract_subject_dataframes(df,subject_index=-1):
 
 def extract_sample_sessions(df,subject_index=-1,session_index=-1):
     subject_30_df, subject_50_df = extract_subject_dataframes(df, subject_index)
-    uuid_30 = subject_30_df['uuid'].unique()[session_index]
-    uuid_50 = subject_50_df['uuid'].unique()[session_index]
+    uuid_30 = subject_30_df[subject_30_df['hand']=='dominant']['uuid'].unique()[session_index]
+    uuid_50 = subject_50_df[subject_50_df['hand']=='dominant']['uuid'].unique()[session_index]
     single_session_30_df = df[df['uuid'] == uuid_30]
     single_session_50_df = df[df['uuid'] == uuid_50]
     return single_session_30_df, single_session_50_df

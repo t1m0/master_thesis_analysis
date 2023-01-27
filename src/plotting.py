@@ -29,7 +29,7 @@ def _box_plot_columns_single(df, class_key, columns, show_column_in_label):
         plt.tight_layout()
         plt.show()
 
-def box_plot_columns(df, class_key='', columns=['x', 'y', 'z', 'mag'],show_column_in_label=True):
+def box_plot_columns(df, class_key='', columns=['x', 'y', 'z'],show_column_in_label=True):
     if type(df) is list or type(df) is set:
         for single_df in df:
             _box_plot_columns_single(single_df,class_key,columns, show_column_in_label)
