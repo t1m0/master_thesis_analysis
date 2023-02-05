@@ -51,9 +51,12 @@ def process_folder(folder_path, file_function):
             local_results = process_folder(file_path,file_function)
             results = results + local_results
         else:
-            local_results = file_function(file_path)
-            if local_results != None:
-                results = results + local_results
+            if not file.startswith("."):
+                local_results = file_function(file_path)
+                if local_results != None:
+                    results = results + local_results
+                else:
+                    print(f'Skipping \'{file_path}\' due to missing accelerations')
             else:
-                print(f'Skipping \'{file_path}\' due to missing accelerations')
+                print(f'Skipping \'{file_path}\' since it\'s a hidden file')
     return results
