@@ -14,6 +14,7 @@ def evaluate_kmeans_model(model, features, classes):
     predictions_df['age_group'] = classes
     predictions_df['cluster'] = kmeans_predicitons
     accuracy = (1-(predictions_df.groupby('age_group')[['cluster']].agg('mean').sum().values[0]/2))
-    return accuracy
+    accuracy = accuracy * 100
+    return round(accuracy,2)
 
 

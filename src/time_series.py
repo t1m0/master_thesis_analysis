@@ -10,7 +10,6 @@ from sklearn.model_selection import ShuffleSplit
 
 from tslearn.neighbors import KNeighborsTimeSeriesClassifier
 from tslearn.svm import TimeSeriesSVC
-from tslearn.metrics import dtw
 
 from src.ml_util import evaluate_model
 
@@ -59,7 +58,7 @@ def long_short_term_memory(sequences, labels):
     model.add(Dense(1, activation='sigmoid'))
 
     model.compile(loss=BinaryCrossentropy(from_logits=False), optimizer='adam', metrics=['accuracy'])
-    model.fit(np.array(sequences), np.array(labels), epochs=200, batch_size=128, verbose=0)
+    model.fit(np.array(sequences), np.array(labels), epochs=25, verbose=0)
 
     return model
 
@@ -103,6 +102,7 @@ def run_time_series_algorithms(df, session_identifier='uuid', compile_sequences_
         array = results[key]
         print(f"{key} single accuracy: {array}")
         mean_accuracy = np.mean(array)
+        mean_accuracy = round(mean_accuracy,2)
         print(f"{key} mean accuracy: {mean_accuracy}")
         results[key] = mean_accuracy
     return results

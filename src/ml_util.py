@@ -14,7 +14,9 @@ from src.random_forest import random_forest
 def evaluate_model(model, features, labels, prediction_correction=lambda x: x):
     predictions = model.predict(features)
     predictions = prediction_correction(predictions)
-    return metrics.accuracy_score(labels, predictions)
+    accuracy = metrics.accuracy_score(labels, predictions)
+    accuracy = accuracy * 100
+    return round(accuracy, 2)
 
 def dummy_classifier(df, feature_keys, neighbors=3):
     train_df = df.reset_index(drop=False)
@@ -56,7 +58,7 @@ def run_feature_algorithms(df, feature_keys, cross_validations=10):
 
         # Random Forest
         rf_model = random_forest(train_df, feature_keys)
-        accuracy = evaluate_model(dt_model, test_features, test_labels)
+        accuracy = evaluate_model(rf_model, test_features, test_labels)
         results['random_forest'].append(accuracy)
 
         # K Neighbors
@@ -73,6 +75,7 @@ def run_feature_algorithms(df, feature_keys, cross_validations=10):
         array = results[key]
         print(f"{key} single accuracy: {array}")
         mean_accuracy = np.mean(array)
+        mean_accuracy = round(mean_accuracy,2)
         print(f"{key} mean accuracy: {mean_accuracy}")
         results[key] = mean_accuracy
 
