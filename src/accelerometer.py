@@ -149,7 +149,7 @@ def _add_legend_to_sub_plots(legends, label_suffix='', linestyle='solid'):
 def _plot_acceleration_sub_plot(df, title,additional_plotting,ymin,ymax):
 
     figure, axis = plt.subplots(3, 1)
-    figure.set_size_inches(30, 15)   
+    figure.set_size_inches(20, 15)   
 
     legends = [{},{},{}]
     

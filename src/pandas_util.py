@@ -76,13 +76,13 @@ def extract_subject_dataframe(df,age_group,subject_index=-1):
     subject_df = df[df['subject'] == subject] 
     return subject_df
 
-def extract_subject_dataframes(df,subject_index=-1):
+def extract_subject_dataframes(df,subject_index=3):
     subject_30_df = extract_subject_dataframe(df,30,subject_index)
     subject_50_df = extract_subject_dataframe(df,50,subject_index)
     return subject_30_df, subject_50_df
 
 
-def extract_sample_sessions(df,subject_index=-1,session_index=-1):
+def extract_sample_sessions(df,subject_index=3,session_index=-1):
     subject_30_df, subject_50_df = extract_subject_dataframes(df, subject_index)
     uuid_30 = subject_30_df[subject_30_df['hand']=='dominant']['uuid'].unique()[session_index]
     uuid_50 = subject_50_df[subject_50_df['hand']=='dominant']['uuid'].unique()[session_index]
