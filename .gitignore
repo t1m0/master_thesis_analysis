@@ -5,3 +5,6 @@
 cloud
 *.pem
 *.csv
+
+images/**
+*.pdf
