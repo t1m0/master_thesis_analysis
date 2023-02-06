@@ -146,7 +146,7 @@ def _add_legend_to_sub_plots(legends, label_suffix='', linestyle='solid'):
     legends[1]['y'+label_suffix] = Line2D([0], [0], color='orange', linestyle=linestyle)
     legends[2]['z'+label_suffix] = Line2D([0], [0], color='green', linestyle=linestyle)
 
-def _plot_acceleration_sub_plot(df, title,additional_plotting,ymin,ymax):
+def _plot_acceleration_sub_plot(df, title,additional_plotting,ymin,ymax,save_to_files):
 
     figure, axis = plt.subplots(3, 1)
     figure.set_size_inches(20, 15)   
@@ -172,7 +172,11 @@ def _plot_acceleration_sub_plot(df, title,additional_plotting,ymin,ymax):
 
     plt.ylabel('acceleration')
     plt.xlabel('duration')
-    plt.show()
+    if not save_to_files:
+        plt.show()
+    else:
+        file_name = title.replace(' ', '_').lower()
+        plt.savefig('images/'+file_name+'.png')
     
 
 def _plot_acceleration(df, label_suffix='', linestyle='solid'):
@@ -189,7 +193,7 @@ def _add_legend_to_single_plots(legends, label_suffix='', linestyle='solid'):
     legends['y'+label_suffix] = Line2D([0], [0], color='orange', linestyle=linestyle)
     legends['z'+label_suffix] = Line2D([0], [0], color='green', linestyle=linestyle)
 
-def _plot_acceleration_single_plot(df,title, additional_plotting,ymin,ymax):
+def _plot_acceleration_single_plot(df,title, additional_plotting,ymin,ymax, save_to_files):
 
     fig = plt.gcf()
     fig.set_size_inches(30, 7.5)
@@ -212,13 +216,17 @@ def _plot_acceleration_single_plot(df,title, additional_plotting,ymin,ymax):
         plt.title(title)
     plt.ylabel('acceleration')
     plt.xlabel('duration')
-    plt.show()
-
-def _plot_acceleration_single(df, title, subplots, additional_plotting,ymin,ymax):
-    if subplots:
-        _plot_acceleration_sub_plot(df, title,additional_plotting,ymin,ymax)
+    if not save_to_files:
+        plt.show()
     else:
-        _plot_acceleration_single_plot(df, title, additional_plotting,ymin,ymax)
+        file_name = title.replace(' ', '_').lower()
+        plt.savefig('images/'+file_name+'.png')
+
+def _plot_acceleration_single(df, title, subplots, additional_plotting,ymin,ymax, save_to_files):
+    if subplots:
+        _plot_acceleration_sub_plot(df, title,additional_plotting,ymin,ymax,save_to_files)
+    else:
+        _plot_acceleration_single_plot(df, title, additional_plotting,ymin,ymax,save_to_files)
 
 def _extract_limit_subplot(df, columns, padding):
     min_values = [0,0,0]
@@ -264,7 +272,7 @@ def _extrac_limits(df, subplots):
     padding = 0.1
     return _extract_limit_subplot(df, columns, padding) if subplots else _extract_limit_single(df, columns, padding)
 
-def plot_acceleration(df, title=None, subplots=True, additional_plotting=lambda df, ax=None:()):
+def plot_acceleration(df, save_to_files=False,title=None, subplots=True, additional_plotting=lambda df, ax=None:()):
     min_value, max_value = _extrac_limits(df, subplots)
     if type(df) is list or type(df) is set:
         index = 0
@@ -273,14 +281,16 @@ def plot_acceleration(df, title=None, subplots=True, additional_plotting=lambda 
                 local_title = title[index]
             else:
                 local_title = None
-            _plot_acceleration_single(single_df,subplots=subplots, title=local_title, additional_plotting=additional_plotting,ymin=min_value,ymax=max_value)
+            _plot_acceleration_single(single_df,subplots=subplots, title=local_title, additional_plotting=additional_plotting,ymin=min_value,ymax=max_value,save_to_files=save_to_files)
             index+=1
     else:
-        _plot_acceleration_single(df,subplots=subplots, title=title, additional_plotting=additional_plotting,ymin=min_value,ymax=max_value)
-    
-    
-    
+        _plot_acceleration_single(df,subplots=subplots, title=title, additional_plotting=additional_plotting,ymin=min_value,ymax=max_value,save_to_files=save_to_files)
 
 def plot_feature_columns(df, field, class_key='age_group'):
     features = ['x_'+field,'y_'+field,'z_'+field,'mag_'+field]
     box_plot_columns(df,class_key,features)
+
+def plot_acceleration_all_subjects(df, title_prefix):
+    for subject in df['subject'].unique():
+        subject_df = df[df['subject']==subject]
+        plot_acceleration(subject_df,save_to_files=True,title=f'{title_prefix} exercises of {subject}')

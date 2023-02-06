@@ -38,3 +38,4 @@ def box_plot_columns(df, class_key='', columns=['x', 'y', 'z'],show_column_in_la
             _box_plot_columns_single(single_df,class_key,columns, show_column_in_label, drop_outlier)
     else:
         _box_plot_columns_single(df,class_key,columns, show_column_in_label, drop_outlier)
+        
